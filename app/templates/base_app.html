@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% block title %}Dashboard{% endblock %} · BudgetBounty</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+<div class="app-shell">
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+  <aside class="app-sidebar" id="appSidebar">
+    <div class="sidebar-brand">
+      <span class="brand-mark"><i class="fa-solid fa-sack-dollar"></i></span>
+      BudgetBounty
+    </div>
+
+    <div class="sidebar-section-label">Overview</div>
+    <a href="{{ url_for('dashboard.index') }}" class="sidebar-link {{ 'active' if request.endpoint == 'dashboard.index' }}">
+      <i class="fa-solid fa-grid-2"></i> Dashboard
+    </a>
+    <a href="{{ url_for('dashboard.accounts') }}" class="sidebar-link {{ 'active' if request.endpoint == 'dashboard.accounts' }}">
+      <i class="fa-solid fa-link"></i> Linked Accounts
+    </a>
+
+    <div class="sidebar-section-label">Money Modules</div>
+    <a href="{{ url_for('transfers.index') }}" class="sidebar-link {{ 'active' if request.blueprint == 'transfers' }}">
+      <i class="fa-solid fa-money-bill-transfer"></i> Digital Transfers
+    </a>
+    <a href="{{ url_for('budgets.index') }}" class="sidebar-link {{ 'active' if request.blueprint == 'budgets' }}">
+      <i class="fa-solid fa-wallet"></i> Cost Control
+    </a>
+    <a href="{{ url_for('bills.index') }}" class="sidebar-link {{ 'active' if request.blueprint == 'bills' }}">
+      <i class="fa-solid fa-calendar-check"></i> Bill Scheduling
+    </a>
+    <a href="{{ url_for('investments.index') }}" class="sidebar-link {{ 'active' if request.blueprint == 'investments' }}">
+      <i class="fa-solid fa-chart-line"></i> Capital Companion
+    </a>
+    <a href="{{ url_for('property.index') }}" class="sidebar-link {{ 'active' if request.blueprint == 'property' }}">
+      <i class="fa-solid fa-house-chimney"></i> Property Payment Pro
+    </a>
+    <a href="{{ url_for('insurance.index') }}" class="sidebar-link {{ 'active' if request.blueprint == 'insurance' }}">
+      <i class="fa-solid fa-shield-heart"></i> Insurance
+    </a>
+    <a href="{{ url_for('tax.index') }}" class="sidebar-link {{ 'active' if request.blueprint == 'tax' }}">
+      <i class="fa-solid fa-file-invoice-dollar"></i> Tax Wise
+    </a>
+    <a href="{{ url_for('locker.index') }}" class="sidebar-link {{ 'active' if request.blueprint == 'locker' }}">
+      <i class="fa-solid fa-folder-open"></i> Digital Locker
+    </a>
+
+    <div class="sidebar-section-label">Rewards</div>
+    <a href="{{ url_for('rewards.index') }}" class="sidebar-link {{ 'active' if request.blueprint == 'rewards' }}">
+      <i class="fa-solid fa-coins"></i> Points & Redemption
+    </a>
+
+    {% if current_user.is_authenticated and current_user.is_admin %}
+    <div class="sidebar-section-label">Admin</div>
+    <a href="{{ url_for('admin.index') }}" class="sidebar-link {{ 'active' if request.blueprint == 'admin' }}">
+      <i class="fa-solid fa-user-shield"></i> Admin Console
+    </a>
+    {% endif %}
+
+    <div class="sidebar-section-label">Account</div>
+    <a href="{{ url_for('dashboard.profile') }}" class="sidebar-link {{ 'active' if request.endpoint == 'dashboard.profile' }}">
+      <i class="fa-solid fa-user-gear"></i> Profile
+    </a>
+    <a href="{{ url_for('auth.logout') }}" class="sidebar-link">
+      <i class="fa-solid fa-right-from-bracket"></i> Logout
+    </a>
+  </aside>
+
+  <div class="app-main">
+    <header class="app-topbar">
+      <div class="d-flex align-items-center gap-3">
+        <button class="topbar-icon-btn d-lg-none" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+        <div class="topbar-search d-none d-md-flex">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <span class="small">Search transactions, bills, documents…</span>
+        </div>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <div class="stat-pill info d-none d-sm-inline-flex">
+          <i class="fa-solid fa-coins"></i> {{ current_user.reward_points or 0 }} pts
+        </div>
+        <div class="dropdown">
+          <button class="topbar-icon-btn" id="notifDropdownBtn" data-bs-toggle="dropdown" data-mark-read-url="{{ url_for('auth.mark_notifications_read') }}">
+            <i class="fa-solid fa-bell"></i>
+            {% if unread_notif_count and unread_notif_count > 0 %}
+            <span class="notif-dot pulse-dot" id="notifDot"></span>
+            {% endif %}
+          </button>
+          <div class="dropdown-menu dropdown-menu-end p-2 shadow-lg border-0" style="width: 340px; border-radius: 16px;">
+            <div class="px-2 py-1 fw-bold">Notifications</div>
+            {% if recent_notifications %}
+              {% for n in recent_notifications %}
+              <div class="d-flex gap-2 px-2 py-2 rounded-3 {{ 'bg-light' if not n.is_read }}">
+                <span class="icon-chip" style="background: var(--bb-primary);"><i class="fa-solid {{ n.icon }}"></i></span>
+                <div class="small">
+                  <div class="fw-semibold">{{ n.title }}</div>
+                  <div class="text-muted">{{ n.message }}</div>
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="text-muted small px-2 py-3">No notifications yet.</div>
+            {% endif %}
+          </div>
+        </div>
+        <div class="dropdown">
+          <button class="topbar-avatar bb-gradient-primary border-0" data-bs-toggle="dropdown">{{ current_user.initials }}</button>
+          <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0" style="border-radius: 14px;">
+            <li><h6 class="dropdown-header">{{ current_user.name }}</h6></li>
+            <li><a class="dropdown-item" href="{{ url_for('dashboard.profile') }}"><i class="fa-solid fa-user me-2"></i>Profile</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('dashboard.accounts') }}"><i class="fa-solid fa-link me-2"></i>Linked Accounts</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="fa-solid fa-right-from-bracket me-2"></i>Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </header>
+
+    <main class="app-content">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="mb-3">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category == 'danger' else category }} alert-dismissible fade show alert-auto-dismiss border-0 shadow-sm" role="alert" style="border-radius: 14px;">
+              <i class="fa-solid {{ 'fa-circle-check' if category == 'success' else 'fa-circle-exclamation' if category in ['danger','warning'] else 'fa-circle-info' }} me-2"></i>
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>window.CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').content;</script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

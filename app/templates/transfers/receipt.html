@@ -1,0 +1,31 @@
+{% extends "base_app.html" %}
+{% block title %}Payment Receipt{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-center">
+  <div class="bb-card text-center fade-in-up" style="max-width: 460px; width:100%;">
+    <div class="icon-chip mx-auto mb-3" style="width:64px;height:64px;font-size:1.6rem;background:#16c79a;border-radius:50%;">
+      <i class="fa-solid fa-check"></i>
+    </div>
+    <h4 class="fw-bold mb-1">Payment Successful</h4>
+    <div class="text-muted small mb-4">Reference No: {{ tx.reference_no }}</div>
+
+    <div class="fs-2 fw-bold mb-1">₹{{ '{:,.2f}'.format(tx.amount) }}</div>
+    <div class="text-muted small mb-4">to {{ tx.recipient_name }}</div>
+
+    <div class="text-start bb-card-flat mb-4">
+      <div class="d-flex justify-content-between py-1"><span class="text-muted small">Method</span><span class="fw-semibold small">{{ tx.method }}</span></div>
+      <div class="d-flex justify-content-between py-1"><span class="text-muted small">To</span><span class="fw-semibold small">{{ tx.recipient_handle }}</span></div>
+      <div class="d-flex justify-content-between py-1"><span class="text-muted small">Status</span><span class="badge-soft success">{{ tx.status|capitalize }}</span></div>
+      <div class="d-flex justify-content-between py-1"><span class="text-muted small">Date</span><span class="fw-semibold small">{{ tx.created_at.strftime('%d %b %Y, %H:%M') }}</span></div>
+      {% if tx.note %}<div class="d-flex justify-content-between py-1"><span class="text-muted small">Note</span><span class="fw-semibold small">{{ tx.note }}</span></div>{% endif %}
+    </div>
+
+    <div class="badge-soft success fs-6 mb-4 d-inline-block"><i class="fa-solid fa-coins me-1"></i>+{{ tx.reward_points_earned }} reward points earned</div>
+
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('transfers.index') }}" class="btn btn-outline-secondary btn-bb flex-fill">View history</a>
+      <a href="{{ url_for('transfers.new') }}" class="btn btn-bb-primary btn-bb flex-fill">New transfer</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

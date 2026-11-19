@@ -1,0 +1,57 @@
+{% extends "base_app.html" %}
+{% block title %}Tax Calculator{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Tax Calculator</div>
+    <div class="page-subtitle">Estimate your tax liability and plan ahead (illustrative Indian slab rates).</div>
+  </div>
+  <a href="{{ url_for('tax.index') }}" class="btn btn-outline-secondary btn-bb"><i class="fa-solid fa-arrow-left me-2"></i>Back</a>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="bb-card">
+      <form method="POST">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label class="form-label fw-semibold small">Tax regime</label>
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <input type="radio" class="btn-check" name="regime" id="regimeNew" value="new" checked>
+            <label class="btn w-100 py-2" for="regimeNew" style="border-radius:12px;border:1.5px solid var(--bb-border);">New Regime</label>
+          </div>
+          <div class="col-6">
+            <input type="radio" class="btn-check" name="regime" id="regimeOld" value="old">
+            <label class="btn w-100 py-2" for="regimeOld" style="border-radius:12px;border:1.5px solid var(--bb-border);">Old Regime</label>
+          </div>
+        </div>
+        <label class="form-label fw-semibold small">Annual income (₹)</label>
+        <input type="number" class="form-control mb-3" name="annual_income" min="0" step="0.01" placeholder="1200000" required>
+        <label class="form-label fw-semibold small">Deductions (₹) — 80C, 80D etc. (old regime only)</label>
+        <input type="number" class="form-control mb-4" name="deductions" min="0" step="0.01" placeholder="150000">
+        <button type="submit" class="btn btn-bb-primary btn-bb w-100"><i class="fa-solid fa-calculator me-2"></i>Calculate tax</button>
+      </form>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    {% if result %}
+    <div class="bb-card fade-in-up">
+      <h6 class="fw-bold mb-3">Estimated tax liability</h6>
+      <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted small">Annual income</span><span class="fw-semibold">₹{{ '{:,.0f}'.format(result.annual_income) }}</span></div>
+      <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted small">Regime</span><span class="badge-soft info">{{ result.regime|capitalize }}</span></div>
+      <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted small">Taxable income</span><span class="fw-semibold">₹{{ '{:,.0f}'.format(result.taxable_income) }}</span></div>
+      <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted small">Tax payable</span><span class="fw-semibold">₹{{ '{:,.0f}'.format(result.tax_payable) }}</span></div>
+      <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted small">Health & education cess (4%)</span><span class="fw-semibold">₹{{ '{:,.0f}'.format(result.cess) }}</span></div>
+      <div class="d-flex justify-content-between py-3"><span class="fw-bold">Total payable</span><span class="fw-bold fs-4" style="color: var(--bb-primary);">₹{{ '{:,.0f}'.format(result.total_payable) }}</span></div>
+    </div>
+    {% else %}
+    <div class="bb-card h-100 d-flex align-items-center justify-content-center text-center" style="background: var(--bb-surface-soft); border-style:dashed;">
+      <div>
+        <i class="fa-solid fa-calculator fs-2 mb-2" style="color: var(--bb-primary);"></i>
+        <p class="text-muted mb-0">Enter your income details to see the estimate.</p>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

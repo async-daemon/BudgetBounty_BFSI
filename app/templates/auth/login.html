@@ -1,0 +1,57 @@
+{% extends "base_public.html" %}
+{% block title %}Log in{% endblock %}
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-visual bb-gradient-dark">
+    <div class="auth-floating-icons">
+      <span style="top:15%; left:20%;"><i class="fa-solid fa-wallet"></i></span>
+      <span style="top:65%; left:65%; animation-delay: -2s;"><i class="fa-solid fa-house-chimney"></i></span>
+      <span style="top:40%; left:50%; animation-delay: -4s;"><i class="fa-solid fa-file-invoice-dollar"></i></span>
+    </div>
+    <div class="auth-logo text-white"><span class="brand-mark"><i class="fa-solid fa-sack-dollar"></i></span>BudgetBounty</div>
+    <div class="text-white position-relative">
+      <h2 class="fw-bold mb-3">Welcome back. Your rewards are waiting.</h2>
+      <p class="text-white-50">Log in to check your points balance, pending bills, and investment progress.</p>
+    </div>
+    <div class="text-white-50 small">© BudgetBounty BFSI</div>
+  </div>
+
+  <div class="auth-form-side">
+    <div class="auth-card fade-in-up">
+      <div class="auth-logo d-lg-none"><span class="brand-mark"><i class="fa-solid fa-sack-dollar"></i></span>BudgetBounty</div>
+      <h3 class="fw-bold mb-1">Log in to your account</h3>
+      <p class="text-muted mb-4">Enter your credentials to access your BudgetBounty dashboard.</p>
+
+      <form method="POST" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="mb-3">
+          <label class="form-label fw-semibold small">Email address</label>
+          {{ form.email(class_="form-control", placeholder="you@example.com") }}
+          {% for error in form.email.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold small">Password</label>
+          <div class="password-field">
+            {{ form.password(class_="form-control", placeholder="••••••••") }}
+            <button type="button" class="password-toggle-btn" data-password-toggle="password" aria-label="Show password" tabindex="-1">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+          {% for error in form.password.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="form-check mb-3">
+          {{ form.remember(class_="form-check-input") }}
+          <label class="form-check-label small text-muted">Remember me</label>
+        </div>
+        {{ form.submit(class_="btn btn-bb-primary w-100") }}
+      </form>
+      <p class="text-center text-muted small mt-4">New to BudgetBounty?
+        <a href="{{ url_for('auth.register') }}" class="fw-semibold" style="color: var(--bb-primary);">Create an account</a>
+      </p>
+      <div class="text-center mt-3">
+        <span class="badge-soft neutral"><i class="fa-solid fa-circle-info me-1"></i>Demo admin: admin@budgetbounty.app / Admin@123</span>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

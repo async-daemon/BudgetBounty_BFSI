@@ -1,0 +1,95 @@
+{% extends "base_app.html" %}
+{% block title %}Points & Redemption{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Points Tracking & Redemption</div>
+    <div class="page-subtitle">Turn your reward points into gift cards, cashback and discounts.</div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="hero-points-card bb-gradient-primary">
+      <div class="text-white-50 small mb-1">Current balance</div>
+      <div class="points-num">{{ current_user.reward_points or 0 }} pts</div>
+    </div>
+  </div>
+  <div class="col-md-4"><div class="bb-card-flat h-100"><div class="text-muted small">Total earned</div><div class="fs-4 fw-bold text-success">+{{ total_earned }}</div></div></div>
+  <div class="col-md-4"><div class="bb-card-flat h-100"><div class="text-muted small">Total redeemed</div><div class="fs-4 fw-bold text-danger">-{{ total_redeemed }}</div></div></div>
+</div>
+
+<h6 class="fw-bold mb-3">Redeem your points</h6>
+<div class="row g-3 mb-4">
+  {% for item in catalog %}
+  <div class="col-md-6 col-lg-4">
+    <div class="reward-item fade-in-up">
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div class="icon-chip" style="background: var(--bb-accent-warm);"><i class="fa-solid {{ item.icon }}"></i></div>
+        <span class="badge-soft info">{{ item.category|capitalize }}</span>
+      </div>
+      <div class="fw-bold">{{ item.name }}</div>
+      <div class="text-muted small mb-1">{{ item.partner_name }}</div>
+      <p class="text-muted small">{{ item.description }}</p>
+      <div class="d-flex justify-content-between align-items-center mt-3">
+        <span class="fw-bold" style="color: var(--bb-primary);">{{ item.points_required }} pts</span>
+        <form method="POST" action="{{ url_for('rewards.redeem', item_id=item.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-bb-sm {{ 'btn-bb-primary' if (current_user.reward_points or 0) >= item.points_required else 'btn-outline-secondary' }}"
+                  {{ 'disabled' if (current_user.reward_points or 0) < item.points_required }}>
+            Redeem
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="bb-card">
+      <h6 class="fw-bold mb-3">Points ledger</h6>
+      {% if ledger %}
+      {% for l in ledger %}
+      <div class="timeline-item">
+        <div class="icon-chip" style="background: {{ '#16c79a' if l.entry_type == 'earn' else '#ff5c7c' }};">
+          <i class="fa-solid {{ 'fa-plus' if l.entry_type == 'earn' else 'fa-minus' }}"></i>
+        </div>
+        <div class="flex-grow-1">
+          <div class="small fw-semibold">{{ l.description }}</div>
+          <div class="text-muted" style="font-size:0.75rem;">{{ l.source_module|replace('_',' ')|title }} · {{ l.created_at.strftime('%d %b %Y') }}</div>
+        </div>
+        <div class="fw-bold {{ 'text-success' if l.entry_type == 'earn' else 'text-danger' }}">{{ '+' if l.entry_type == 'earn' else '' }}{{ l.points }}</div>
+      </div>
+      {% endfor %}
+      {% else %}
+      <div class="empty-state"><i class="fa-solid fa-list"></i><p>No activity yet.</p></div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="bb-card">
+      <h6 class="fw-bold mb-3">Redemption history</h6>
+      {% if redemptions %}
+      <div class="table-responsive">
+        <table class="table table-bb mb-0">
+          <thead><tr><th>Reward</th><th>Points</th><th>Date</th></tr></thead>
+          <tbody>
+            {% for r in redemptions %}
+            <tr>
+              <td class="fw-semibold">{{ r.item.name }}</td>
+              <td class="text-danger">-{{ r.points_spent }}</td>
+              <td class="text-muted small">{{ r.redeemed_at.strftime('%d %b %Y') }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state"><i class="fa-solid fa-gift"></i><p>No redemptions yet.</p></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

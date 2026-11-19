@@ -1,0 +1,37 @@
+{% extends "base_app.html" %}
+{% block title %}Admin · Property Approvals{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="page-title">Property Payment Approvals</div><div class="page-subtitle">Approve pending property management payments.</div></div>
+  <a href="{{ url_for('admin.index') }}" class="btn btn-outline-secondary btn-bb"><i class="fa-solid fa-arrow-left me-2"></i>Back</a>
+</div>
+
+<div class="bb-card">
+  {% if pending %}
+  <div class="table-responsive">
+    <table class="table table-bb mb-0">
+      <thead><tr><th>Property</th><th>User</th><th>Type</th><th>Amount</th><th>Due date</th><th></th></tr></thead>
+      <tbody>
+        {% for p in pending %}
+        <tr>
+          <td class="fw-semibold">{{ p.property.name }}</td>
+          <td class="text-muted small">{{ p.property.user.name }}</td>
+          <td><span class="badge-soft info">{{ p.payment_type }}</span></td>
+          <td>₹{{ '{:,.0f}'.format(p.amount) }}</td>
+          <td>{{ p.due_date.strftime('%d %b %Y') }}</td>
+          <td class="text-end">
+            <form method="POST" action="{{ url_for('admin.approve_property_payment', payment_id=p.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-bb-sm btn-bb-primary">Approve</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state"><i class="fa-solid fa-circle-check"></i><p>No pending approvals. All caught up!</p></div>
+  {% endif %}
+</div>
+{% endblock %}

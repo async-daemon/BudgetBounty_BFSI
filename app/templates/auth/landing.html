@@ -1,0 +1,133 @@
+{% extends "base_public.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+
+<nav class="landing-nav navbar navbar-expand-lg py-3">
+  <div class="container">
+    <a class="navbar-brand" href="{{ url_for('auth.landing') }}">
+      <span class="brand-mark"><i class="fa-solid fa-sack-dollar"></i></span>BudgetBounty
+    </a>
+    <div class="d-flex gap-2 align-items-center">
+      <a href="{{ url_for('auth.login') }}" class="btn btn-link text-decoration-none fw-semibold text-dark d-none d-sm-inline-block">Log in</a>
+      <a href="{{ url_for('auth.register') }}" class="btn btn-bb-primary btn-sm px-3">Get started free</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero-section bb-gradient-dark">
+  <div class="container position-relative">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6 animate__animated animate__fadeInUp">
+        <span class="hero-badge"><i class="fa-solid fa-sparkles"></i> Reward-driven personal finance</span>
+        <h1 class="hero-title mt-4 mb-3">Manage your money.<br>Earn real <span class="bb-text-gradient">rewards</span> for it.</h1>
+        <p class="hero-sub mb-4">BudgetBounty brings UPI transfers, budgeting, bill scheduling, investments, insurance,
+          tax and a secure Digital Locker into one app — and pays you reward points every time you make a smart
+          financial move.</p>
+        <div class="d-flex gap-3 flex-wrap">
+          <a href="{{ url_for('auth.register') }}" class="btn btn-bb-primary"><i class="fa-solid fa-rocket me-2"></i>Create free account</a>
+          <a href="#features" class="btn btn-bb-ghost"><i class="fa-solid fa-circle-play me-2"></i>Explore features</a>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat"><div class="num"><span data-count-up="9">0</span></div><div class="label">Reward modules</div></div>
+          <div class="hero-stat"><div class="num">₹<span data-count-up="250">0</span>Cr+</div><div class="label">Simulated volume</div></div>
+          <div class="hero-stat"><div class="num"><span data-count-up="4">0</span></div><div class="label">Payment rails: UPI/NEFT/RTGS/IMPS</div></div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="hero-visual">
+          <div class="glass-card p-4 animate__animated animate__fadeIn animate__delay-1s">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div class="text-white-50 small">Reward wallet</div>
+              <i class="fa-solid fa-wallet text-white-50"></i>
+            </div>
+            <div class="text-white fw-bold" style="font-size:2.2rem;">4,280 pts</div>
+            <div class="text-white-50 small mb-3">≈ ₹1,070 in redeemable value</div>
+            <div class="progress-thin mb-4" style="background: rgba(255,255,255,0.15);">
+              <div class="bar bb-gradient-primary" style="width: 68%;"></div>
+            </div>
+            <div class="row g-3">
+              <div class="col-6">
+                <div class="p-3 rounded-4" style="background: rgba(255,255,255,0.07);">
+                  <i class="fa-solid fa-money-bill-transfer text-white-50 mb-2"></i>
+                  <div class="text-white small fw-semibold">UPI Transfer</div>
+                  <div class="text-white-50" style="font-size:0.75rem;">+12 pts earned</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="p-3 rounded-4" style="background: rgba(255,255,255,0.07);">
+                  <i class="fa-solid fa-chart-line text-white-50 mb-2"></i>
+                  <div class="text-white small fw-semibold">Investment Goal</div>
+                  <div class="text-white-50" style="font-size:0.75rem;">+100 pts earned</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="p-3 rounded-4" style="background: rgba(255,255,255,0.07);">
+                  <i class="fa-solid fa-calendar-check text-white-50 mb-2"></i>
+                  <div class="text-white small fw-semibold">Bill paid on time</div>
+                  <div class="text-white-50" style="font-size:0.75rem;">+25 pts earned</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="p-3 rounded-4" style="background: rgba(255,255,255,0.07);">
+                  <i class="fa-solid fa-gift text-white-50 mb-2"></i>
+                  <div class="text-white small fw-semibold">Redeem rewards</div>
+                  <div class="text-white-50" style="font-size:0.75rem;">6 partners live</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="feature-section" id="features">
+  <div class="container">
+    <div class="text-center mb-5">
+      <div class="section-eyebrow">Everything in one app</div>
+      <h2 class="section-title">9 modules built around your financial life</h2>
+      <p class="text-muted">Straight from the BudgetBounty Business Requirements Document — each module rewards you for good financial behaviour.</p>
+    </div>
+    <div class="row g-4">
+      {% set features = [
+        ('fa-money-bill-transfer', '#5b4bff', 'Digital Money Transfers', 'UPI, NEFT, RTGS & IMPS payments with instant reward points on every transaction.'),
+        ('fa-wallet', '#16a085', 'Cost Control', 'Category budgets, real-time spend tracking and alerts when you are close to your limit.'),
+        ('fa-calendar-check', '#f39c12', 'Timed Payment Scheduling', 'Schedule one-off or recurring bills and never miss a due date again.'),
+        ('fa-chart-line', '#2980b9', 'Capital Companion', 'Track investments and portfolio performance, and set goals that pay you rewards.'),
+        ('fa-house-chimney', '#8e44ad', 'Property Payment Pro', 'Pay rent, maintenance and society fees with partner-system approvals.'),
+        ('fa-shield-heart', '#c0392b', 'Hassle-free Insurance', 'Link policies, get reminders, and earn points for timely premium payments.'),
+        ('fa-file-invoice-dollar', '#27ae60', 'Tax Wise', 'Built-in tax calculator plus reminders so you never miss a filing deadline.'),
+        ('fa-folder-open', '#d35400', 'Digital Locker', 'Securely store receipts, statements and policy documents in one place.'),
+        ('fa-coins', '#e67e22', 'Points Tracking & Redemption', 'Turn every smart money move into gift cards, cashback and discounts.'),
+      ] %}
+      {% for icon, color, title, desc in features %}
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-card">
+          <div class="feature-icon" style="background: {{ color }};"><i class="fa-solid {{ icon }}"></i></div>
+          <h5 class="fw-bold mb-2">{{ title }}</h5>
+          <p class="text-muted mb-0 small">{{ desc }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="container">
+  <div class="cta-section bb-gradient-primary">
+    <div class="position-relative">
+      <h2 class="fw-bold mb-3" style="font-size: 2rem;">Ready to turn good money habits into rewards?</h2>
+      <p class="mb-4" style="opacity:0.9;">Create your free BudgetBounty account in under a minute.</p>
+      <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-bb px-4 fw-bold"><i class="fa-solid fa-user-plus me-2"></i>Sign up now</a>
+    </div>
+  </div>
+</section>
+
+<footer class="landing-footer">
+  <div class="container d-flex flex-wrap justify-content-between align-items-center">
+    <div class="fw-semibold text-dark"><i class="fa-solid fa-sack-dollar me-2"></i>BudgetBounty</div>
+    <div class="small">© {{ 2024 }} BudgetBounty BFSI. Built for demonstration purposes.</div>
+  </div>
+</footer>
+{% endblock %}

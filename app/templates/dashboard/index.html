@@ -1,0 +1,139 @@
+{% extends "base_app.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+
+<div class="page-header fade-in-up">
+  <div>
+    <div class="page-title">Welcome back, {{ current_user.name.split(' ')[0] }} 👋</div>
+    <div class="page-subtitle">Here's what's happening across your BudgetBounty account today.</div>
+  </div>
+  <a href="{{ url_for('transfers.new') }}" class="btn btn-bb-primary btn-bb"><i class="fa-solid fa-paper-plane me-2"></i>New Transfer</a>
+</div>
+
+{% if overdue_bills %}
+<div class="alert border-0 shadow-sm mb-4 d-flex align-items-center gap-3" style="background:#fff3e4; border-radius:16px;">
+  <i class="fa-solid fa-triangle-exclamation text-warning fs-4"></i>
+  <div class="flex-grow-1">
+    <strong>{{ overdue_bills|length }} bill(s) overdue.</strong> Pay them now to avoid missing your timely-payment rewards.
+  </div>
+  <a href="{{ url_for('bills.index') }}" class="btn btn-bb-sm btn-warning">Review bills</a>
+</div>
+{% endif %}
+
+<div class="row g-4 mb-4">
+  <div class="col-lg-4">
+    <div class="hero-points-card bb-gradient-primary h-100 fade-in-up">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div class="text-white-50 small mb-1">Reward wallet balance</div>
+          <div class="points-num"><span data-count-up="{{ current_user.reward_points or 0 }}">0</span> pts</div>
+          <div class="text-white-50 small mt-1">≈ ₹{{ '%.0f'|format((current_user.reward_points or 0) * 0.25) }} redeemable value</div>
+        </div>
+        <div class="icon-chip" style="background: rgba(255,255,255,0.18);"><i class="fa-solid fa-coins"></i></div>
+      </div>
+      <a href="{{ url_for('rewards.index') }}" class="btn btn-light btn-bb-sm fw-bold mt-4">Redeem rewards <i class="fa-solid fa-arrow-right ms-1"></i></a>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="bb-card h-100 fade-in-up">
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <div class="text-muted small">Total transacted</div>
+        <div class="icon-chip" style="background:#5b4bff;"><i class="fa-solid fa-money-bill-transfer"></i></div>
+      </div>
+      <div class="fs-3 fw-bold">₹{{ '{:,.0f}'.format(total_transacted) }}</div>
+      <div class="text-muted small">via UPI / NEFT / RTGS / IMPS</div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="bb-card h-100 fade-in-up">
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <div class="text-muted small">Investment portfolio value</div>
+        <div class="icon-chip" style="background:#2980b9;"><i class="fa-solid fa-chart-line"></i></div>
+      </div>
+      <div class="fs-3 fw-bold">₹{{ '{:,.0f}'.format(total_current_value) }}</div>
+      <div class="text-muted small">{{ goals|length }} investment goal(s) tracked</div>
+    </div>
+  </div>
+</div>
+
+<h5 class="fw-bold mb-3">Your modules</h5>
+<div class="row g-3 mb-4">
+  {% for m in module_summary %}
+  <div class="col-sm-6 col-lg-3">
+    <a href="{{ m.url }}" class="module-tile fade-in-up">
+      <div class="mod-icon" style="background: {{ m.color }};"><i class="fa-solid {{ m.icon }}"></i></div>
+      <div class="fw-semibold small text-muted">{{ m.name }}</div>
+      <div class="mod-value">{{ m.value }}</div>
+      <div class="mod-sub">{{ m.sub }}</div>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="bb-card h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="fw-bold mb-0">Recent transactions</h6>
+        <a href="{{ url_for('transfers.index') }}" class="small fw-semibold" style="color: var(--bb-primary);">View all</a>
+      </div>
+      {% if recent_tx %}
+      <div class="table-responsive">
+        <table class="table table-bb mb-0">
+          <thead><tr><th>Recipient</th><th>Method</th><th>Amount</th><th>Points</th><th>Date</th></tr></thead>
+          <tbody>
+            {% for t in recent_tx %}
+            <tr>
+              <td class="fw-semibold">{{ t.recipient_name }}</td>
+              <td><span class="badge-soft info">{{ t.method }}</span></td>
+              <td>₹{{ '{:,.0f}'.format(t.amount) }}</td>
+              <td><span class="badge-soft success">+{{ t.reward_points_earned }} pts</span></td>
+              <td class="text-muted small">{{ t.created_at.strftime('%d %b, %H:%M') }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state"><i class="fa-solid fa-money-bill-transfer"></i><p>No transactions yet. <a href="{{ url_for('transfers.new') }}">Send your first payment</a>.</p></div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="bb-card h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="fw-bold mb-0">Reward activity</h6>
+        <a href="{{ url_for('rewards.index') }}" class="small fw-semibold" style="color: var(--bb-primary);">View all</a>
+      </div>
+      {% if recent_rewards %}
+        {% for r in recent_rewards %}
+        <div class="timeline-item">
+          <div class="icon-chip" style="background: {{ '#16c79a' if r.entry_type == 'earn' else '#ff5c7c' }};">
+            <i class="fa-solid {{ 'fa-plus' if r.entry_type == 'earn' else 'fa-minus' }}"></i>
+          </div>
+          <div class="flex-grow-1">
+            <div class="small fw-semibold">{{ r.description }}</div>
+            <div class="text-muted" style="font-size: 0.75rem;">{{ r.created_at.strftime('%d %b %Y, %H:%M') }}</div>
+          </div>
+          <div class="fw-bold {{ 'text-success' if r.entry_type == 'earn' else 'text-danger' }}">
+            {{ '+' if r.entry_type == 'earn' else '' }}{{ r.points }}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+      <div class="empty-state"><i class="fa-solid fa-coins"></i><p>No reward activity yet. Start transacting to earn points!</p></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% if linked_accounts|length == 0 %}
+<div class="bb-card mt-4 text-center fade-in-up" style="background: var(--bb-surface-soft); border-style: dashed;">
+  <i class="fa-solid fa-link fs-2 mb-2" style="color: var(--bb-primary);"></i>
+  <h6 class="fw-bold">Link a financial account to get started</h6>
+  <p class="text-muted small mb-3">Connect your bank, UPI, investment, insurance or tax account to unlock all modules.</p>
+  <a href="{{ url_for('dashboard.accounts') }}" class="btn btn-bb-primary btn-bb-sm">Link an account</a>
+</div>
+{% endif %}
+
+{% endblock %}

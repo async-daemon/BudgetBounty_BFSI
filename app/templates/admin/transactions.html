@@ -1,0 +1,49 @@
+{% extends "base_app.html" %}
+{% block title %}Admin · Transactions{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="page-title">Transaction Tracking & Reporting</div><div class="page-subtitle">{{ transactions|length }} transactions across all users.</div></div>
+  <a href="{{ url_for('admin.index') }}" class="btn btn-outline-secondary btn-bb"><i class="fa-solid fa-arrow-left me-2"></i>Back</a>
+</div>
+
+<div class="row g-3 mb-4">
+  {% for m, total in by_method.items() %}
+  <div class="col-md-3">
+    <div class="bb-card-flat">
+      <div class="text-muted small">{{ m }}</div>
+      <div class="fs-5 fw-bold">₹{{ '{:,.0f}'.format(total) }}</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="bb-card">
+  <div class="d-flex gap-2 mb-3">
+    <a href="{{ url_for('admin.transactions') }}" class="btn btn-bb-sm {{ 'btn-bb-primary' if not method else 'btn-outline-secondary' }}">All</a>
+    {% for m in ['UPI','NEFT','RTGS','IMPS'] %}
+    <a href="{{ url_for('admin.transactions', method=m) }}" class="btn btn-bb-sm {{ 'btn-bb-primary' if method == m else 'btn-outline-secondary' }}">{{ m }}</a>
+    {% endfor %}
+  </div>
+  {% if transactions %}
+  <div class="table-responsive">
+    <table class="table table-bb mb-0">
+      <thead><tr><th>Reference</th><th>Recipient</th><th>Method</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+      <tbody>
+        {% for t in transactions %}
+        <tr>
+          <td class="small text-muted">{{ t.reference_no }}</td>
+          <td class="fw-semibold">{{ t.recipient_name }}</td>
+          <td><span class="badge-soft info">{{ t.method }}</span></td>
+          <td>₹{{ '{:,.0f}'.format(t.amount) }}</td>
+          <td><span class="badge-soft success">{{ t.status|capitalize }}</span></td>
+          <td class="text-muted small">{{ t.created_at.strftime('%d %b %Y, %H:%M') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state"><i class="fa-solid fa-chart-column"></i><p>No transactions found.</p></div>
+  {% endif %}
+</div>
+{% endblock %}

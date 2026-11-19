@@ -1,0 +1,87 @@
+{% extends "base_app.html" %}
+{% block title %}Admin Console{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Admin Console</div>
+    <div class="page-subtitle">Platform-wide overview and management tools.</div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3"><div class="bb-card-flat"><div class="text-muted small">Total users</div><div class="fs-4 fw-bold">{{ stats.total_users }}</div></div></div>
+  <div class="col-md-3"><div class="bb-card-flat"><div class="text-muted small">Transactions</div><div class="fs-4 fw-bold">{{ stats.total_transactions }}</div></div></div>
+  <div class="col-md-3"><div class="bb-card-flat"><div class="text-muted small">Total volume</div><div class="fs-4 fw-bold">₹{{ '{:,.0f}'.format(stats.total_volume) }}</div></div></div>
+  <div class="col-md-3"><div class="bb-card-flat"><div class="text-muted small">Points issued</div><div class="fs-4 fw-bold text-success">{{ stats.total_points_issued }}</div></div></div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-6">
+    <a href="{{ url_for('admin.reward_rules') }}" class="module-tile">
+      <div class="mod-icon" style="background:#5b4bff;"><i class="fa-solid fa-sliders"></i></div>
+      <div class="fw-semibold">Reward Rules</div>
+      <div class="mod-sub">Configure points per module</div>
+    </a>
+  </div>
+  <div class="col-md-6">
+    <a href="{{ url_for('admin.catalog') }}" class="module-tile">
+      <div class="mod-icon" style="background:#e67e22;"><i class="fa-solid fa-gift"></i></div>
+      <div class="fw-semibold">Reward Catalog</div>
+      <div class="mod-sub">Manage redeemable items</div>
+    </a>
+  </div>
+  <div class="col-md-6">
+    <a href="{{ url_for('admin.users') }}" class="module-tile">
+      <div class="mod-icon" style="background:#16a085;"><i class="fa-solid fa-users"></i></div>
+      <div class="fw-semibold">User Management</div>
+      <div class="mod-sub">{{ stats.total_users }} registered users</div>
+    </a>
+  </div>
+  <div class="col-md-6">
+    <a href="{{ url_for('admin.transactions') }}" class="module-tile">
+      <div class="mod-icon" style="background:#2980b9;"><i class="fa-solid fa-chart-column"></i></div>
+      <div class="fw-semibold">Transaction Tracking</div>
+      <div class="mod-sub">Monitor payment trends</div>
+    </a>
+  </div>
+  <div class="col-md-6">
+    <a href="{{ url_for('admin.property_approvals') }}" class="module-tile">
+      <div class="mod-icon" style="background:#8e44ad;"><i class="fa-solid fa-house-chimney"></i></div>
+      <div class="fw-semibold">Property Approvals</div>
+      <div class="mod-sub">{{ stats.pending_property_payments }} pending</div>
+    </a>
+  </div>
+  <div class="col-md-6">
+    <div class="module-tile" style="cursor:default;">
+      <div class="mod-icon" style="background:#f39c12;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+      <div class="fw-semibold">Overdue Bills</div>
+      <div class="mod-sub">{{ stats.overdue_bills }} across all users</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="bb-card">
+      <h6 class="fw-bold mb-3">Recently joined users</h6>
+      {% for u in recent_users %}
+      <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+        <div><div class="fw-semibold small">{{ u.name }}</div><div class="text-muted" style="font-size:0.75rem;">{{ u.email }}</div></div>
+        <span class="badge-soft {{ 'info' if u.role == 'admin' else 'neutral' }}">{{ u.role }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="bb-card">
+      <h6 class="fw-bold mb-3">Recent transactions</h6>
+      {% for t in recent_tx %}
+      <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+        <div><div class="fw-semibold small">{{ t.recipient_name }}</div><div class="text-muted" style="font-size:0.75rem;">{{ t.method }}</div></div>
+        <div class="fw-semibold">₹{{ '{:,.0f}'.format(t.amount) }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

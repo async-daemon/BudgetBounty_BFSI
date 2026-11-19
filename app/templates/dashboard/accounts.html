@@ -1,0 +1,84 @@
+{% extends "base_app.html" %}
+{% block title %}Linked Accounts{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Linked Accounts</div>
+    <div class="page-subtitle">Connect your bank, UPI, investment, insurance, tax or property accounts.</div>
+  </div>
+  <button class="btn btn-bb-primary btn-bb" data-bs-toggle="modal" data-bs-target="#linkAccountModal"><i class="fa-solid fa-plus me-2"></i>Link account</button>
+</div>
+
+<div class="row g-3">
+  {% for acc in accounts %}
+  <div class="col-md-6 col-lg-4">
+    <div class="bb-card-flat h-100 fade-in-up">
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div class="icon-chip" style="background: var(--bb-primary);">
+          <i class="fa-solid {{ 'fa-qrcode' if acc.account_type == 'upi' else 'fa-building-columns' if acc.account_type == 'bank' else 'fa-chart-line' if acc.account_type == 'investment' else 'fa-shield-heart' if acc.account_type == 'insurance' else 'fa-file-invoice-dollar' if acc.account_type == 'tax' else 'fa-house-chimney' }}"></i>
+        </div>
+        <span class="badge-soft success">{{ acc.status }}</span>
+      </div>
+      <div class="fw-bold">{{ acc.institution_name }}</div>
+      <div class="text-muted small text-uppercase">{{ acc.account_type }}</div>
+      <div class="text-muted small mt-2">{{ acc.upi_id or acc.account_number_masked or '—' }}</div>
+      <form method="POST" action="{{ url_for('dashboard.unlink_account', account_id=acc.id) }}" class="mt-3">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-outline-danger btn-bb-sm w-100" onclick="return confirm('Unlink this account?')"><i class="fa-solid fa-link-slash me-1"></i>Unlink</button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+  <div class="col-md-6 col-lg-4">
+    <div class="bb-card-flat h-100 d-flex align-items-center justify-content-center text-center fade-in-up" style="border-style: dashed; cursor:pointer;" data-bs-toggle="modal" data-bs-target="#linkAccountModal">
+      <div>
+        <i class="fa-solid fa-circle-plus fs-2 mb-2" style="color: var(--bb-primary);"></i>
+        <div class="fw-semibold small">Link a new account</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if not accounts %}
+<div class="empty-state"><i class="fa-solid fa-link"></i><p>No accounts linked yet.</p></div>
+{% endif %}
+
+<div class="modal fade" id="linkAccountModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 18px; border:none;">
+      <form method="POST" action="{{ url_for('dashboard.link_account') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="modal-header border-0">
+          <h5 class="modal-title fw-bold">Link a financial account</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Account type</label>
+            <select class="form-select" name="account_type" required>
+              <option value="bank">Bank Account</option>
+              <option value="upi">UPI</option>
+              <option value="investment">Investment Account</option>
+              <option value="insurance">Insurance Account</option>
+              <option value="tax">Tax Account</option>
+              <option value="property">Property Management Account</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Institution / Provider name</label>
+            <input type="text" class="form-control" name="institution_name" placeholder="e.g. HDFC Bank" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Account number / UPI ID</label>
+            <input type="text" class="form-control" name="identifier" placeholder="e.g. name@okaxis or 1234567890" required>
+          </div>
+          <div class="small text-muted"><i class="fa-solid fa-lock me-1"></i>Credentials are simulated for this demo — no real bank connection is made.</div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="submit" class="btn btn-bb-primary btn-bb w-100">Link account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
