@@ -1,102 +1,122 @@
-# BudgetBounty — Reward-driven Budgeting Application (BFSI)
+# BudgetBounty (BFSI) — Java / Spring Boot / Hibernate / Oracle / Angular
 
-A full-stack implementation of the BudgetBounty Business Requirements Document: a personal finance
-platform that rewards users with points for good financial behaviour — digital payments, budgeting,
-bill payments, investing, insurance, tax, and secure document storage.
+A reward-driven personal finance platform for BFSI customers, built on the exact technology
+stack called out in the project's BRD architecture diagram: **Java, Spring (MVC), Hibernate ORM,
+Oracle Database, and Angular**. Every BFSI use case earns the user reward points for good
+financial behaviour — paying bills on time, staying within budget, hitting investment goals,
+paying premiums and taxes promptly — which can be redeemed from a central rewards catalog.
 
-- **Backend:** Python 3 / Flask (Flask-SQLAlchemy, Flask-Login, Flask-WTF, SQLite)
-- **Frontend:** Server-rendered Jinja2 templates styled with Bootstrap 5, Font Awesome 6, Google Fonts,
-  Chart.js and CSS animations — a custom design system (`app/static/css/style.css`)
-- **Architecture:** Flask application factory + blueprints, one blueprint per BRD module
+A separate prototype of this same application exists in Flask/Python
+(`../BudgetBounty_BFSI` history) — this version is the one that matches the BRD's specified
+stack and is the one intended for further development and deployment.
 
-## Modules implemented (from the BRD's 9 use cases)
+## Architecture: BRD vs. what was actually built
 
-| # | Use case | Blueprint |
-|---|----------|-----------|
-| 1 | Digital Money Transfers (UPI / NEFT / RTGS / IMPS) | `app/blueprints/transfers` |
-| 2 | Cost Control (category budgets, spend tracking, alerts) | `app/blueprints/budgets` |
-| 3 | Timed Payment Scheduling (one-off & recurring bills) | `app/blueprints/bills` |
-| 4 | Capital Companion (investments & goals) | `app/blueprints/investments` |
-| 5 | Property Payment Pro (rent/maintenance + admin approval) | `app/blueprints/property` |
-| 6 | Hassle-free Insurance Payment Management | `app/blueprints/insurance` |
-| 7 | Tax Wise: Calculator & Reminder | `app/blueprints/tax` |
-| 8 | Digital Locker (secure document storage) | `app/blueprints/locker` |
-| 9 | Points Tracking & Redemption | `app/blueprints/rewards` |
+| Layer | BRD specifies | This build uses | Why |
+|---|---|---|---|
+| Language | Java 1.8 | **Java 17 (LTS)** | Java 8 is end-of-life and unsupported by current Spring Boot/Maven tooling |
+| Web framework | Spring MVC (Tomcat, XML config) | **Spring Boot 4.2.0** (embedded Tomcat, Java config) | Same Spring MVC programming model, modern bootstrapping |
+| ORM | Hibernate | **Hibernate ORM 7.4.15** (via Spring Data JPA) | Matches — Spring Data JPA is a thin repository layer over Hibernate |
+| Database | Oracle 11g | **Oracle Database 26ai Free** | Oracle 11g is archived and unobtainable; 26ai Free is Oracle's current free edition |
+| Frontend | Angular | **Angular 21.2.13** (standalone components, signals) | Matches |
 
-Plus: onboarding/auth (`app/blueprints/auth`), an overview dashboard (`app/blueprints/dashboard`),
-and an Admin Console (`app/blueprints/admin`) covering reward-rule configuration, the reward catalog,
-user management, transaction monitoring, and property-payment approvals — implementing the BRD's
-Admin user stories.
+No other framework (no alternate database, no non-Angular frontend) was substituted anywhere.
 
-A central reward engine (`app/utils/rewards.py`) is the single place every module credits or debits
-points, keeping the ledger (`RewardTransaction`) and `User.reward_points` consistent, and raising an
-in-app notification for every award.
+## Modules (all implemented, backend + Angular UI, and verified end-to-end against live Oracle data)
 
-> **Note on scope:** Real bank/UPI/insurance/tax-authority APIs are not available in this environment,
-> so those third-party integrations (Use Case requirements like "integrate with insurance payment API")
-> are simulated: payments complete instantly and reward points are awarded exactly as the BRD specifies,
-> but no money actually moves and no external API is called. The BRD's architecture diagram specifies
-> Java/Spring/Oracle; this build uses Python/Flask/SQLite per your request — the same layered design
-> (presentation / business / data access) is preserved.
+1. **Dashboard** — points balance, totals across all modules, recent notifications
+2. **Digital Money Transfers** — UPI/NEFT/RTGS/IMPS transfers with reward points per transaction
+3. **Cost Control (Budgets)** — category budgets, expense logging, period close-out rewards
+4. **Bill Payments** — one-time & recurring bills, autopay flag, on-time payment rewards
+5. **Capital Companion (Investments)** — investment goals + portfolio tracking, gain/loss, goal-completion rewards
+6. **Property Payment Pro** — scheduled property payments **gated by admin approval** before they can be paid
+7. **Insurance** — policy tracking and premium payments
+8. **Tax Wise** — Indian income-tax calculator (old/new regime) + tax record payments
+9. **Digital Locker** — document upload/download/delete (multipart file storage)
+10. **Rewards** — points ledger, redemption catalog, redemption history
+11. **Admin Console** — user list, reward-rule point values, reward catalog management, all transactions, property-payment approvals
 
-## Getting started
+## System requirements
+
+- Windows 10/11, macOS, or Linux
+- 8 GB RAM minimum (Oracle Database is the heaviest component)
+- ~10 GB free disk space (Oracle install + Maven/npm caches)
+
+## Prerequisites to install
+
+| Software | Version used | Notes |
+|---|---|---|
+| JDK | 17 (LTS) | `java -version` |
+| Maven | 3.9.9+ | bundled `mvnw` wrapper also included |
+| Node.js | 20.x+ | for Angular CLI / npm |
+| Angular CLI | 21.x | `npm install -g @angular/cli` |
+| Oracle Database | 26ai Free | https://www.oracle.com/database/free/ |
+| Oracle JDBC driver | `ojdbc11` (Maven Central) | pulled automatically by Maven |
+
+## Database setup
+
+1. Install Oracle Database 26ai Free and note the listener port (default `1521`) and the
+   pluggable database service name (default `FREEPDB1`).
+2. Create an application user/schema, e.g.:
+   ```sql
+   ALTER SESSION SET CONTAINER = FREEPDB1;
+   CREATE USER budgetbounty IDENTIFIED BY "BudgetBounty_2026";
+   GRANT CONNECT, RESOURCE, DBA TO budgetbounty;
+   ALTER USER budgetbounty QUOTA UNLIMITED ON USERS;
+   ```
+3. Update `backend/src/main/resources/application.yml` if your username/password/service name differ
+   from the defaults shown there.
+
+Hibernate is configured with `ddl-auto: update`, so tables are created/updated automatically on
+first run — no manual schema scripts are required.
+
+## Running the backend
 
 ```bash
-cd "BudgetBounty_BFSI"
-python -m venv .venv
+cd backend
+./mvnw spring-boot:run
 ```
 
-Activate the virtual environment, then install dependencies:
+The API starts on `http://localhost:8080`, under the `/api` base path. On first run (empty
+database), `SeedDataRunner` seeds:
+- The reward catalog and reward-rule point values (always, idempotently)
+- Two demo accounts (only when the `users` table is empty):
+  - **Admin:** `admin@budgetbounty.app` / `Admin@123`
+  - **Demo user:** `demo@budgetbounty.app` / `Demo@123` — pre-loaded with sample transactions,
+    budgets, bills, an investment goal + investments, a property + payment, an insurance policy,
+    and a tax record.
+
+## Running the frontend
 
 ```bash
-.venv\Scripts\activate
-pip install -r requirements.txt
+cd frontend
+npm install
+ng serve --port 4300
 ```
 
-Seed demo data (creates an admin account, a demo user, and sample records across every module):
+Open `http://localhost:4300`. The dev server proxies API calls straight to
+`http://localhost:8080/api` (see `src/environments/environment.ts`).
 
-```bash
-python seed.py
-```
+> Note: port `4300` (not Angular's default `4200`) is used here to avoid clashing with other
+> Angular projects that may already be running on this machine.
 
-Run the app:
+## Authentication
 
-```bash
-python run.py
-```
+JWT-based, stateless. On register/login the backend issues a signed JWT (24h expiry) containing
+the user's email and role; the Angular `authInterceptor` attaches it as a `Bearer` token to every
+API call, and a route guard (`authGuard` / `adminGuard`) protects the authenticated shell and the
+admin-only routes respectively.
 
-Then open **http://127.0.0.1:5000** in your browser.
+## Property Payment approval workflow
 
-### Demo logins
+Property payments follow a strict state machine enforced on the backend, not just the UI:
+`pending` → (admin approves/rejects) → `approved`/`rejected` → (user pays) → `paid`. A payment
+cannot be paid until an administrator has approved it — the `/api/property/payments/{id}/pay`
+endpoint rejects the request otherwise.
 
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | `admin@budgetbounty.app` | `Admin@123` |
-| Demo user | `demo@budgetbounty.app` | `Demo@123` |
+## Testing performed
 
-Or register a brand-new account from the landing page — every new user starts with a clean,
-zero-state dashboard.
-
-## Project layout
-
-```
-BudgetBounty_BFSI/
-├── app/
-│   ├── blueprints/        one package per module (routes.py per blueprint)
-│   ├── templates/         Jinja2 templates, one folder per blueprint
-│   ├── static/css|js/     design system + small JS (sidebar, notifications, dropzone, count-up)
-│   ├── models.py          all SQLAlchemy models (one section per use case)
-│   ├── utils/rewards.py   central reward-points engine
-│   └── __init__.py        app factory, blueprint registration, first-run seed of reward rules
-├── config.py              app configuration (DB URI, upload folder, default reward values)
-├── run.py                 dev server entrypoint
-├── seed.py                demo data seed script
-└── requirements.txt
-```
-
-## Notes
-
-- Database: SQLite file at `instance/budgetbounty.db` (auto-created on first run).
-- Uploaded Digital Locker files are stored under `uploads/` (gitignored).
-- This repository's `.git` is managed manually, per project instructions — no git commands were run
-  by the assistant that built this.
+Every module listed above was exercised end-to-end through the running Angular UI against the
+live Oracle-backed Spring Boot API (not just compiled): creating records, running transitions
+(pay/approve/reject/redeem/close period), and confirming reward points, dashboard totals, and the
+top-bar points badge all stay consistent with each other after every action.

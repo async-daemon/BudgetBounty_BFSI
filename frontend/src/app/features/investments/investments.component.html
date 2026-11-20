@@ -1,0 +1,144 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h3 class="fw-bold mb-1">Capital Companion</h3>
+    <p class="text-muted mb-0">Set investment goals and track your portfolio's performance.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <button class="btn btn-outline-secondary fw-semibold" (click)="showGoalForm.set(!showGoalForm())">
+      <i class="fa-solid fa-bullseye me-1"></i> New Goal
+    </button>
+    <button class="btn text-white fw-semibold" style="background:#5b4bff;" (click)="showInvestmentForm.set(!showInvestmentForm())">
+      <i class="fa-solid fa-plus me-1"></i> Add Investment
+    </button>
+  </div>
+</div>
+
+<div *ngIf="successMessage()" class="alert alert-success animate__animated animate__fadeIn">{{ successMessage() }}</div>
+<div *ngIf="errorMessage()" class="alert alert-danger">{{ errorMessage() }}</div>
+
+<div class="bb-card p-4 mb-4" *ngIf="showGoalForm()">
+  <h5 class="fw-bold mb-3">Create an investment goal</h5>
+  <form [formGroup]="goalForm" (ngSubmit)="submitGoal()">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label small fw-semibold">Goal name</label>
+        <input type="text" class="form-control" formControlName="name" placeholder="Retirement Fund">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label small fw-semibold">Target amount (₹)</label>
+        <input type="number" class="form-control" formControlName="targetAmount" placeholder="1000000">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label small fw-semibold">Target date</label>
+        <input type="date" class="form-control" formControlName="targetDate">
+      </div>
+    </div>
+    <button type="submit" class="btn text-white fw-semibold mt-3" style="background:#5b4bff;" [disabled]="submittingGoal()">
+      <span *ngIf="submittingGoal()" class="spinner-border spinner-border-sm me-2"></span>
+      Create Goal
+    </button>
+  </form>
+</div>
+
+<div class="bb-card p-4 mb-4" *ngIf="showInvestmentForm()">
+  <h5 class="fw-bold mb-3">Add an investment</h5>
+  <form [formGroup]="investmentForm" (ngSubmit)="submitInvestment()">
+    <div class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label small fw-semibold">Name</label>
+        <input type="text" class="form-control" formControlName="name" placeholder="Axis Bluechip Fund">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small fw-semibold">Asset type</label>
+        <select class="form-select" formControlName="assetType">
+          <option>Mutual Fund</option>
+          <option>Stocks</option>
+          <option>Fixed Deposit</option>
+          <option>Bonds</option>
+          <option>Gold</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small fw-semibold">Invested amount (₹)</label>
+        <input type="number" class="form-control" formControlName="investedAmount" placeholder="50000">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small fw-semibold">Current value (₹)</label>
+        <input type="number" class="form-control" formControlName="currentValue" placeholder="55000">
+      </div>
+      <div class="col-md-4" *ngIf="goals().length">
+        <label class="form-label small fw-semibold">Link to goal (optional)</label>
+        <select class="form-select" formControlName="goalId">
+          <option [ngValue]="null">None</option>
+          <option *ngFor="let g of goals()" [ngValue]="g.id">{{ g.name }}</option>
+        </select>
+      </div>
+    </div>
+    <button type="submit" class="btn text-white fw-semibold mt-3" style="background:#5b4bff;" [disabled]="submittingInvestment()">
+      <span *ngIf="submittingInvestment()" class="spinner-border spinner-border-sm me-2"></span>
+      Add Investment
+    </button>
+  </form>
+</div>
+
+<div *ngIf="loading()" class="text-center py-4">
+  <div class="spinner-border" style="color:#5b4bff;"></div>
+</div>
+
+<div *ngIf="!loading()">
+  <h5 class="fw-bold mb-3">Goals</h5>
+  <div class="row g-3 mb-4">
+    <div class="col-md-6 col-lg-4" *ngFor="let g of goals()">
+      <div class="bb-card p-4 h-100">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <h6 class="fw-bold mb-0">{{ g.name }}</h6>
+          <span class="badge bg-light text-dark border">{{ g.status }}</span>
+        </div>
+        <div class="progress mb-2" style="height:8px;">
+          <div class="progress-bar" [style.width.%]="g.percentComplete" style="background:#5b4bff;"></div>
+        </div>
+        <p class="small text-muted mb-1">₹{{ g.currentAmount.toLocaleString('en-IN') }} of ₹{{ g.targetAmount.toLocaleString('en-IN') }} ({{ g.percentComplete }}%)</p>
+        <p class="small text-muted mb-0" *ngIf="g.targetDate">Target: {{ g.targetDate }}</p>
+        <p class="small text-success mb-0">+{{ g.rewardPointsEarned }} pts</p>
+      </div>
+    </div>
+    <div class="col-12" *ngIf="goals().length === 0">
+      <div class="bb-card p-4 text-center text-muted">No investment goals yet.</div>
+    </div>
+  </div>
+
+  <h5 class="fw-bold mb-3">Portfolio</h5>
+  <div class="bb-card p-4">
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr class="text-muted small">
+            <th>Name</th><th>Type</th><th>Invested</th><th>Current value</th><th>Gain/Loss</th><th>Goal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let i of investments()">
+            <td class="fw-semibold">{{ i.name }}</td>
+            <td><span class="badge bg-light text-dark border">{{ i.assetType }}</span></td>
+            <td>₹{{ i.investedAmount.toLocaleString('en-IN') }}</td>
+            <td>₹{{ i.currentValue.toLocaleString('en-IN') }}</td>
+            <td [class.text-success]="i.gainLoss >= 0" [class.text-danger]="i.gainLoss < 0">
+              {{ i.gainLoss >= 0 ? '+' : '' }}₹{{ i.gainLoss.toLocaleString('en-IN') }} ({{ i.gainLossPercent }}%)
+            </td>
+            <td class="small text-muted">
+              <ng-container *ngIf="i.goalId; else noGoal">
+                <ng-container *ngFor="let g of goals()">
+                  <span *ngIf="g.id === i.goalId">{{ g.name }}</span>
+                </ng-container>
+              </ng-container>
+              <ng-template #noGoal>-</ng-template>
+            </td>
+          </tr>
+          <tr *ngIf="investments().length === 0">
+            <td colspan="6" class="text-center text-muted py-4">No investments yet.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

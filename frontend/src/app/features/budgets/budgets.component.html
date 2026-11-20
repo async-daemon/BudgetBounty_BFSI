@@ -1,0 +1,78 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h3 class="fw-bold mb-1">Cost Control</h3>
+    <p class="text-muted mb-0">Set category budgets, log expenses, and earn rewards for staying on track.</p>
+  </div>
+  <button class="btn text-white fw-semibold" style="background:#5b4bff;" (click)="showForm.set(!showForm())">
+    <i class="fa-solid fa-plus me-1"></i> New Budget
+  </button>
+</div>
+
+<div *ngIf="successMessage()" class="alert alert-success animate__animated animate__fadeIn">{{ successMessage() }}</div>
+<div *ngIf="errorMessage()" class="alert alert-danger">{{ errorMessage() }}</div>
+
+<div class="bb-card p-4 mb-4" *ngIf="showForm()">
+  <h5 class="fw-bold mb-3">Create a budget</h5>
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label small fw-semibold">Category</label>
+        <input type="text" class="form-control" formControlName="category" placeholder="Groceries">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label small fw-semibold">Monthly limit (₹)</label>
+        <input type="number" class="form-control" formControlName="monthlyLimit" placeholder="10000">
+      </div>
+    </div>
+    <button type="submit" class="btn text-white fw-semibold mt-3" style="background:#5b4bff;" [disabled]="submitting()">
+      <span *ngIf="submitting()" class="spinner-border spinner-border-sm me-2"></span>
+      Create Budget
+    </button>
+  </form>
+</div>
+
+<div *ngIf="loading()" class="text-center py-4">
+  <div class="spinner-border" style="color:#5b4bff;"></div>
+</div>
+
+<div class="row g-3" *ngIf="!loading()">
+  <div class="col-md-6 col-lg-4" *ngFor="let b of budgets()">
+    <div class="bb-card p-4 h-100">
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <h6 class="fw-bold mb-0">{{ b.category }}</h6>
+        <span class="badge" [class.bg-danger]="b.overBudget" [class.bg-success]="!b.overBudget">
+          {{ b.overBudget ? 'Over budget' : 'On track' }}
+        </span>
+      </div>
+      <div class="progress mb-2" style="height:8px;">
+        <div class="progress-bar" [class.bg-danger]="b.overBudget" [style.width.%]="b.percentUsed > 100 ? 100 : b.percentUsed"
+             style="background:#5b4bff;"></div>
+      </div>
+      <p class="small text-muted mb-2">₹{{ b.spentAmount.toLocaleString('en-IN') }} of ₹{{ b.monthlyLimit.toLocaleString('en-IN') }} ({{ b.percentUsed }}%)</p>
+      <p class="small text-muted mb-3">Period: {{ b.period }} &middot; <span class="text-success">+{{ b.rewardPointsEarned }} pts</span></p>
+
+      <div *ngIf="expenseFormOpenFor() === b.id" class="mb-2">
+        <form [formGroup]="expenseForm" (ngSubmit)="logExpense(b.id)">
+          <input type="number" class="form-control form-control-sm mb-2" placeholder="Amount" formControlName="amount">
+          <input type="text" class="form-control form-control-sm mb-2" placeholder="Description (optional)" formControlName="description">
+          <button type="submit" class="btn btn-sm text-white" style="background:#5b4bff;">Log</button>
+        </form>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-outline-secondary" (click)="toggleExpenseForm(b.id)">
+          <i class="fa-solid fa-receipt me-1"></i> Log Expense
+        </button>
+        <button class="btn btn-sm btn-outline-success" (click)="closeBudget(b.id)">
+          <i class="fa-solid fa-check me-1"></i> Close Period
+        </button>
+        <button class="btn btn-sm btn-outline-danger" (click)="deleteBudget(b.id)">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="col-12" *ngIf="budgets().length === 0">
+    <div class="bb-card p-4 text-center text-muted">No budgets yet. Create one to start tracking.</div>
+  </div>
+</div>

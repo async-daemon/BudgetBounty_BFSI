@@ -1,13 +1,21 @@
-__pycache__/
-*.pyc
-.venv/
-venv/
-env/
-instance/
-uploads/
-*.db
-.env
-.DS_Store
+# --- Backend (Maven / Spring Boot) ---
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+backend/*.iml
+backend/.idea/
+backend/uploads/
+
+# --- Frontend (Angular / Node) ---
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/*.iml
+frontend/.idea/
+
+# --- Common ---
 *.log
+*.class
+.DS_Store
+Thumbs.db
 .vscode/
-.idea/
+*.swp

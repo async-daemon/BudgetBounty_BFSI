@@ -1,0 +1,46 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: budgetbounty-backend
+  datasource:
+    url: jdbc:oracle:thin:@//localhost:1521/FREEPDB1
+    username: budgetbounty
+    password: BudgetBounty_2026
+    driver-class-name: oracle.jdbc.OracleDriver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.OracleDialect
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+
+budgetbounty:
+  jwt:
+    secret: "ChangeThisDevOnlySecretKeyForBudgetBountyJwtSigning2026!!"
+    expiration-ms: 86400000 # 24h
+  upload-dir: "./uploads"
+  cors:
+    allowed-origins: "http://localhost:4300"
+  reward:
+    redemption-point-value-inr: 0.25
+    default-rules:
+      transfer: 1
+      budget_adherence: 50
+      bill_timely: 25
+      investment_goal: 75
+      property_payment: 20
+      insurance_payment: 30
+      tax_payment: 40
+
+logging:
+  level:
+    com.budgetbounty: INFO
+    org.hibernate.SQL: WARN

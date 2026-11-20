@@ -1,0 +1,93 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h3 class="fw-bold mb-1">Bill Payments</h3>
+    <p class="text-muted mb-0">Track recurring and one-time bills, and never miss a due date.</p>
+  </div>
+  <button class="btn text-white fw-semibold" style="background:#5b4bff;" (click)="showForm.set(!showForm())">
+    <i class="fa-solid fa-plus me-1"></i> New Bill
+  </button>
+</div>
+
+<div *ngIf="successMessage()" class="alert alert-success animate__animated animate__fadeIn">{{ successMessage() }}</div>
+<div *ngIf="errorMessage()" class="alert alert-danger">{{ errorMessage() }}</div>
+
+<div class="bb-card p-4 mb-4" *ngIf="showForm()">
+  <h5 class="fw-bold mb-3">Add a bill</h5>
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label small fw-semibold">Name</label>
+        <input type="text" class="form-control" formControlName="name" placeholder="Electricity">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label small fw-semibold">Category</label>
+        <input type="text" class="form-control" formControlName="category" placeholder="Utilities">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label small fw-semibold">Amount (₹)</label>
+        <input type="number" class="form-control" formControlName="amount" placeholder="1800">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label small fw-semibold">Due date</label>
+        <input type="date" class="form-control" formControlName="dueDate">
+      </div>
+      <div class="col-md-4 d-flex align-items-center gap-2 mt-4">
+        <input type="checkbox" class="form-check-input" id="recurring" formControlName="recurring">
+        <label class="form-check-label small" for="recurring">Recurring</label>
+      </div>
+      <div class="col-md-4" *ngIf="form.value.recurring">
+        <label class="form-label small fw-semibold">Frequency</label>
+        <select class="form-select" formControlName="frequency">
+          <option value="monthly">Monthly</option>
+          <option value="quarterly">Quarterly</option>
+          <option value="yearly">Yearly</option>
+        </select>
+      </div>
+      <div class="col-md-4 d-flex align-items-center gap-2 mt-4">
+        <input type="checkbox" class="form-check-input" id="autopay" formControlName="autopay">
+        <label class="form-check-label small" for="autopay">Autopay</label>
+      </div>
+    </div>
+    <button type="submit" class="btn text-white fw-semibold mt-3" style="background:#5b4bff;" [disabled]="submitting()">
+      <span *ngIf="submitting()" class="spinner-border spinner-border-sm me-2"></span>
+      Add Bill
+    </button>
+  </form>
+</div>
+
+<div class="bb-card p-4">
+  <h5 class="fw-bold mb-3">Your bills</h5>
+  <div *ngIf="loading()" class="text-center py-4">
+    <div class="spinner-border" style="color:#5b4bff;"></div>
+  </div>
+  <div class="table-responsive" *ngIf="!loading()">
+    <table class="table align-middle">
+      <thead>
+        <tr class="text-muted small">
+          <th>Name</th><th>Category</th><th>Amount</th><th>Due</th><th>Status</th><th>Points</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let bill of bills()">
+          <td>{{ bill.name }}<span class="badge bg-light text-dark border ms-1" *ngIf="bill.autopay">Autopay</span></td>
+          <td class="small text-muted">{{ bill.category }}</td>
+          <td class="fw-semibold">₹{{ bill.amount.toLocaleString('en-IN') }}</td>
+          <td class="small" [class.text-danger]="bill.overdue">{{ bill.dueDate }}</td>
+          <td>
+            <span class="badge" [class.bg-success]="bill.status === 'paid'"
+                  [class.bg-danger]="bill.status === 'cancelled' || bill.overdue"
+                  [class.bg-warning]="bill.status === 'scheduled' && !bill.overdue">{{ bill.status }}</span>
+          </td>
+          <td class="text-success fw-semibold">{{ bill.rewardPointsEarned ? '+' + bill.rewardPointsEarned : '-' }}</td>
+          <td>
+            <button class="btn btn-sm text-white me-1" style="background:#5b4bff;" *ngIf="bill.status === 'scheduled'" (click)="pay(bill.id)">Pay</button>
+            <button class="btn btn-sm btn-outline-danger" *ngIf="bill.status === 'scheduled'" (click)="cancel(bill.id)">Cancel</button>
+          </td>
+        </tr>
+        <tr *ngIf="bills().length === 0">
+          <td colspan="7" class="text-center text-muted py-4">No bills yet.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

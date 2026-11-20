@@ -1,0 +1,43 @@
+<div class="d-flex min-vh-100" style="background:#f7f7fb;">
+  <aside class="d-flex flex-column p-3 text-white shell-sidebar"
+         [class.shell-sidebar-open]="sidebarOpen()"
+         style="width:260px; background:#1e1b4b; position:fixed; height:100vh; z-index:20; overflow-y:auto;">
+    <div class="d-flex align-items-center gap-2 fw-bold fs-5 mb-4">
+      <i class="fa-solid fa-sack-dollar"></i> BudgetBounty
+    </div>
+    <nav class="flex-grow-1">
+      <a *ngFor="let item of navItems" [routerLink]="item.path" routerLinkActive="active-nav"
+         class="d-flex align-items-center gap-2 text-white-50 text-decoration-none py-2 px-2 rounded mb-1 nav-link-item">
+        <i class="fa-solid {{item.icon}}"></i> {{ item.label }}
+      </a>
+      <a *ngIf="auth.currentUser()?.admin" routerLink="/admin" routerLinkActive="active-nav"
+         class="d-flex align-items-center gap-2 text-white-50 text-decoration-none py-2 px-2 rounded mb-1 nav-link-item">
+        <i class="fa-solid fa-user-shield"></i> Admin Console
+      </a>
+    </nav>
+    <button class="btn btn-sm btn-outline-light mt-3" (click)="logout()">
+      <i class="fa-solid fa-right-from-bracket me-1"></i> Logout
+    </button>
+  </aside>
+
+  <div class="flex-grow-1 shell-content">
+    <header class="d-flex justify-content-between align-items-center bg-white border-bottom px-3 px-lg-4 py-2">
+      <button class="btn btn-sm btn-outline-secondary d-lg-none" (click)="toggleSidebar()">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <div class="d-none d-lg-block"></div>
+      <div class="d-flex align-items-center gap-3">
+        <span class="badge rounded-pill" style="background:#5b4bff;">
+          <i class="fa-solid fa-star me-1"></i>{{ auth.currentUser()?.rewardPoints ?? 0 }} pts
+        </span>
+        <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
+             [style.background]="auth.currentUser()?.avatarColor" style="width:36px; height:36px;">
+          {{ auth.currentUser()?.initials }}
+        </div>
+      </div>
+    </header>
+    <main class="p-3 p-lg-4">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

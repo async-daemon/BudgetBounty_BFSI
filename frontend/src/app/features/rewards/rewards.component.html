@@ -1,0 +1,67 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h3 class="fw-bold mb-1">Rewards</h3>
+    <p class="text-muted mb-0">Redeem your points for real BFSI benefits.</p>
+  </div>
+  <span class="badge rounded-pill fs-6 px-3 py-2" style="background:#5b4bff;">
+    <i class="fa-solid fa-star me-1"></i>{{ auth.currentUser()?.rewardPoints ?? 0 }} points
+  </span>
+</div>
+
+<div *ngIf="successMessage()" class="alert alert-success animate__animated animate__fadeIn">{{ successMessage() }}</div>
+<div *ngIf="errorMessage()" class="alert alert-danger">{{ errorMessage() }}</div>
+
+<div *ngIf="loading()" class="text-center py-4">
+  <div class="spinner-border" style="color:#5b4bff;"></div>
+</div>
+
+<div *ngIf="!loading()">
+  <h5 class="fw-bold mb-3">Reward catalog</h5>
+  <div class="row g-3 mb-4">
+    <div class="col-md-6 col-lg-4" *ngFor="let item of catalog()">
+      <div class="bb-card p-4 h-100 d-flex flex-column">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <i class="fa-solid {{ item.icon || 'fa-gift' }} fs-4" style="color:#5b4bff;"></i>
+          <h6 class="fw-bold mb-0">{{ item.name }}</h6>
+        </div>
+        <p class="small text-muted flex-grow-1">{{ item.description }}</p>
+        <p class="small text-muted mb-2" *ngIf="item.partnerName">Partner: {{ item.partnerName }}</p>
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">{{ item.pointsRequired }} pts</span>
+          <button class="btn btn-sm text-white" style="background:#5b4bff;" [disabled]="redeemingId() === item.id" (click)="redeem(item)">
+            <span *ngIf="redeemingId() === item.id" class="spinner-border spinner-border-sm me-1"></span>
+            Redeem
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="col-12" *ngIf="catalog().length === 0">
+      <div class="bb-card p-4 text-center text-muted">No reward items available right now.</div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-6">
+      <div class="bb-card p-4">
+        <h6 class="fw-bold mb-3">Points ledger</h6>
+        <div class="small d-flex justify-content-between border-bottom py-2" *ngFor="let t of ledger()">
+          <span>{{ t.description || t.sourceModule }}</span>
+          <span class="fw-semibold" [class.text-success]="t.entryType === 'earn'" [class.text-danger]="t.entryType !== 'earn'">
+            {{ t.entryType === 'earn' ? '+' : '-' }}{{ t.points }}
+          </span>
+        </div>
+        <p class="text-muted small py-3 mb-0" *ngIf="ledger().length === 0">No points activity yet.</p>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="bb-card p-4">
+        <h6 class="fw-bold mb-3">Redemption history</h6>
+        <div class="small d-flex justify-content-between border-bottom py-2" *ngFor="let r of redemptions()">
+          <span>{{ r.itemName }}</span>
+          <span class="fw-semibold">-{{ r.pointsSpent }} <span class="badge bg-light text-dark border ms-1">{{ r.status }}</span></span>
+        </div>
+        <p class="text-muted small py-3 mb-0" *ngIf="redemptions().length === 0">No redemptions yet.</p>
+      </div>
+    </div>
+  </div>
+</div>

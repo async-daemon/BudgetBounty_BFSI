@@ -1,0 +1,72 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h3 class="fw-bold mb-1">Insurance</h3>
+    <p class="text-muted mb-0">Track your policies and pay premiums on time.</p>
+  </div>
+  <button class="btn text-white fw-semibold" style="background:#5b4bff;" (click)="showForm.set(!showForm())">
+    <i class="fa-solid fa-plus me-1"></i> Add Policy
+  </button>
+</div>
+
+<div *ngIf="successMessage()" class="alert alert-success animate__animated animate__fadeIn">{{ successMessage() }}</div>
+<div *ngIf="errorMessage()" class="alert alert-danger">{{ errorMessage() }}</div>
+
+<div class="bb-card p-4 mb-4" *ngIf="showForm()">
+  <h5 class="fw-bold mb-3">Add a policy</h5>
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label small fw-semibold">Provider</label>
+        <input type="text" class="form-control" formControlName="provider" placeholder="LIC">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small fw-semibold">Policy number</label>
+        <input type="text" class="form-control" formControlName="policyNumber" placeholder="LIC-998877">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small fw-semibold">Type</label>
+        <select class="form-select" formControlName="policyType">
+          <option>Health</option>
+          <option>Life</option>
+          <option>Vehicle</option>
+          <option>Home</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small fw-semibold">Premium (₹)</label>
+        <input type="number" class="form-control" formControlName="premiumAmount" placeholder="5000">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small fw-semibold">Due date</label>
+        <input type="date" class="form-control" formControlName="dueDate">
+      </div>
+    </div>
+    <button type="submit" class="btn text-white fw-semibold mt-3" style="background:#5b4bff;" [disabled]="submitting()">
+      <span *ngIf="submitting()" class="spinner-border spinner-border-sm me-2"></span>
+      Add Policy
+    </button>
+  </form>
+</div>
+
+<div *ngIf="loading()" class="text-center py-4">
+  <div class="spinner-border" style="color:#5b4bff;"></div>
+</div>
+
+<div class="row g-3" *ngIf="!loading()">
+  <div class="col-md-6 col-lg-4" *ngFor="let policy of policies()">
+    <div class="bb-card p-4 h-100">
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <h6 class="fw-bold mb-0">{{ policy.provider }}</h6>
+        <span class="badge" [class.bg-success]="policy.status === 'active'" [class.bg-warning]="policy.status !== 'active'">{{ policy.status }}</span>
+      </div>
+      <p class="small text-muted mb-1">{{ policy.policyType }} &middot; {{ policy.policyNumber }}</p>
+      <p class="small mb-3">Premium: ₹{{ policy.premiumAmount.toLocaleString('en-IN') }} &middot; Due: {{ policy.dueDate }}</p>
+      <button class="btn btn-sm text-white" style="background:#5b4bff;" (click)="pay(policy.id)">
+        <i class="fa-solid fa-credit-card me-1"></i> Pay Premium
+      </button>
+    </div>
+  </div>
+  <div class="col-12" *ngIf="policies().length === 0">
+    <div class="bb-card p-4 text-center text-muted">No insurance policies yet.</div>
+  </div>
+</div>

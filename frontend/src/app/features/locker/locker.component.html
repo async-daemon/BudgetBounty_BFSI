@@ -1,0 +1,64 @@
+<h3 class="fw-bold mb-1">Digital Locker</h3>
+<p class="text-muted mb-3">Securely store and retrieve your important documents.</p>
+
+<div *ngIf="successMessage()" class="alert alert-success animate__animated animate__fadeIn">{{ successMessage() }}</div>
+<div *ngIf="errorMessage()" class="alert alert-danger">{{ errorMessage() }}</div>
+
+<div class="bb-card p-4 mb-4">
+  <h5 class="fw-bold mb-3">Upload a document</h5>
+  <div class="row g-3 align-items-end">
+    <div class="col-md-4">
+      <label class="form-label small fw-semibold">Folder</label>
+      <select class="form-select" [ngModel]="folder()" (ngModelChange)="folder.set($event)">
+        <option>General</option>
+        <option>Identity</option>
+        <option>Property</option>
+        <option>Insurance</option>
+        <option>Tax</option>
+        <option>Investments</option>
+      </select>
+    </div>
+    <div class="col-md-5">
+      <label class="form-label small fw-semibold">File</label>
+      <input type="file" class="form-control" (change)="onFileSelected($event)">
+    </div>
+    <div class="col-md-3">
+      <button class="btn text-white fw-semibold w-100" style="background:#5b4bff;" (click)="upload()" [disabled]="uploading()">
+        <span *ngIf="uploading()" class="spinner-border spinner-border-sm me-2"></span>
+        Upload
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="bb-card p-4">
+  <h5 class="fw-bold mb-3">Your documents</h5>
+  <div *ngIf="loading()" class="text-center py-4">
+    <div class="spinner-border" style="color:#5b4bff;"></div>
+  </div>
+  <div class="table-responsive" *ngIf="!loading()">
+    <table class="table align-middle">
+      <thead>
+        <tr class="text-muted small">
+          <th>Name</th><th>Folder</th><th>Type</th><th>Size</th><th>Uploaded</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let doc of documents()">
+          <td class="fw-semibold"><i class="fa-solid fa-file-lines me-2 text-muted"></i>{{ doc.originalName }}</td>
+          <td><span class="badge bg-light text-dark border">{{ doc.folder || 'General' }}</span></td>
+          <td class="small text-muted">{{ doc.fileType }}</td>
+          <td class="small">{{ formatSize(doc.sizeBytes) }}</td>
+          <td class="small">{{ doc.uploadedAt | slice:0:10 }}</td>
+          <td>
+            <button class="btn btn-sm btn-outline-secondary me-1" (click)="download(doc)"><i class="fa-solid fa-download"></i></button>
+            <button class="btn btn-sm btn-outline-danger" (click)="delete(doc.id)"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        </tr>
+        <tr *ngIf="documents().length === 0">
+          <td colspan="6" class="text-center text-muted py-4">No documents uploaded yet.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

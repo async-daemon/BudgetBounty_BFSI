@@ -1,0 +1,107 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h3 class="fw-bold mb-1">Property Payment Pro</h3>
+    <p class="text-muted mb-0">Manage properties and scheduled payments. Payments need admin approval before they can be paid.</p>
+  </div>
+  <button class="btn text-white fw-semibold" style="background:#5b4bff;" (click)="showPropertyForm.set(!showPropertyForm())">
+    <i class="fa-solid fa-plus me-1"></i> Add Property
+  </button>
+</div>
+
+<div *ngIf="successMessage()" class="alert alert-success animate__animated animate__fadeIn">{{ successMessage() }}</div>
+<div *ngIf="errorMessage()" class="alert alert-danger">{{ errorMessage() }}</div>
+
+<div class="bb-card p-4 mb-4" *ngIf="showPropertyForm()">
+  <h5 class="fw-bold mb-3">Add a property</h5>
+  <form [formGroup]="propertyForm" (ngSubmit)="submitProperty()">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label small fw-semibold">Name</label>
+        <input type="text" class="form-control" formControlName="name" placeholder="Green Valley Apartment">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label small fw-semibold">Address</label>
+        <input type="text" class="form-control" formControlName="address" placeholder="Pune, MH">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label small fw-semibold">Property manager</label>
+        <input type="text" class="form-control" formControlName="manager" placeholder="ABC Estates">
+      </div>
+    </div>
+    <button type="submit" class="btn text-white fw-semibold mt-3" style="background:#5b4bff;" [disabled]="submittingProperty()">
+      <span *ngIf="submittingProperty()" class="spinner-border spinner-border-sm me-2"></span>
+      Add Property
+    </button>
+  </form>
+</div>
+
+<div *ngIf="loading()" class="text-center py-4">
+  <div class="spinner-border" style="color:#5b4bff;"></div>
+</div>
+
+<div *ngIf="!loading()">
+  <div class="row g-3 mb-4">
+    <div class="col-md-6" *ngFor="let p of properties()">
+      <div class="bb-card p-4 h-100">
+        <h6 class="fw-bold mb-1">{{ p.name }}</h6>
+        <p class="small text-muted mb-1">{{ p.address }}</p>
+        <p class="small text-muted mb-3">Manager: {{ p.propertyManager || '-' }}</p>
+
+        <div *ngIf="scheduleFormOpenFor() === p.id" class="mb-2">
+          <form [formGroup]="scheduleForm" (ngSubmit)="schedulePayment(p.id)">
+            <select class="form-select form-select-sm mb-2" formControlName="paymentType">
+              <option>Rent</option>
+              <option>Maintenance</option>
+              <option>Society Dues</option>
+              <option>Utilities</option>
+            </select>
+            <input type="number" class="form-control form-control-sm mb-2" placeholder="Amount" formControlName="amount">
+            <input type="date" class="form-control form-control-sm mb-2" formControlName="dueDate">
+            <button type="submit" class="btn btn-sm text-white" style="background:#5b4bff;">Schedule</button>
+          </form>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary" (click)="toggleScheduleForm(p.id)">
+          <i class="fa-solid fa-calendar-plus me-1"></i> Schedule Payment
+        </button>
+      </div>
+    </div>
+    <div class="col-12" *ngIf="properties().length === 0">
+      <div class="bb-card p-4 text-center text-muted">No properties yet. Add one to schedule payments.</div>
+    </div>
+  </div>
+
+  <div class="bb-card p-4">
+    <h5 class="fw-bold mb-3">Payments</h5>
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr class="text-muted small">
+            <th>Property</th><th>Type</th><th>Amount</th><th>Due</th><th>Status</th><th>Points</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let payment of payments()">
+            <td class="fw-semibold">{{ payment.propertyName }}</td>
+            <td class="small text-muted">{{ payment.paymentType }}</td>
+            <td>₹{{ payment.amount.toLocaleString('en-IN') }}</td>
+            <td class="small">{{ payment.dueDate }}</td>
+            <td>
+              <span class="badge"
+                    [class.bg-warning]="payment.status === 'pending'"
+                    [class.bg-info]="payment.status === 'approved'"
+                    [class.bg-success]="payment.status === 'paid'"
+                    [class.bg-danger]="payment.status === 'rejected'">{{ payment.status }}</span>
+            </td>
+            <td class="text-success fw-semibold">{{ payment.rewardPointsEarned ? '+' + payment.rewardPointsEarned : '-' }}</td>
+            <td>
+              <button class="btn btn-sm text-white" style="background:#5b4bff;" *ngIf="payment.status === 'approved'" (click)="pay(payment.id)">Pay</button>
+            </td>
+          </tr>
+          <tr *ngIf="payments().length === 0">
+            <td colspan="7" class="text-center text-muted py-4">No payments scheduled.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,73 @@
+<div class="auth-wrapper d-flex min-vh-100">
+  <div class="auth-visual d-none d-lg-flex flex-column justify-content-between p-5 text-white"
+       style="flex:1; background: linear-gradient(135deg,#1e1b4b,#5b4bff);">
+    <div class="d-flex align-items-center gap-2 fw-bold fs-4">
+      <i class="fa-solid fa-sack-dollar"></i> BudgetBounty
+    </div>
+    <div>
+      <h2 class="fw-bold mb-3">Join thousands earning rewards on everyday finance.</h2>
+      <p class="text-white-50">Digital transfers, budgeting, bills, investments, insurance, tax, and a secure
+        Digital Locker &mdash; all in one place, all earning you points.</p>
+    </div>
+    <div class="text-white-50 small">&copy; BudgetBounty BFSI</div>
+  </div>
+
+  <div class="d-flex flex-1 align-items-center justify-content-center p-4" style="flex:1; background:#f7f7fb;">
+    <div class="card border-0 shadow-sm p-4" style="width:100%; max-width:440px; border-radius:16px;">
+      <h3 class="fw-bold mb-1">Create your account</h3>
+      <p class="text-muted mb-4">Set up your account to start earning rewards for every smart financial move.</p>
+
+      <div *ngIf="error()" class="alert alert-danger py-2">{{ error() }}</div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="mb-3">
+          <label class="form-label fw-semibold small">Full name</label>
+          <input type="text" class="form-control" formControlName="name" placeholder="Ananya Sharma">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold small">Email address</label>
+          <input type="text" class="form-control" formControlName="email" placeholder="you@example.com">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold small">Phone number</label>
+          <input type="text" class="form-control" formControlName="phone" placeholder="+91 98765 43210">
+        </div>
+        <div class="row g-2">
+          <div class="col-6 mb-3">
+            <label class="form-label fw-semibold small">Password</label>
+            <div class="position-relative">
+              <input [type]="showPassword() ? 'text' : 'password'" class="form-control pe-5"
+                     formControlName="password" placeholder="********">
+              <button type="button" class="btn btn-sm position-absolute top-50 end-0 translate-middle-y me-1 text-muted"
+                      (click)="showPassword.set(!showPassword())" tabindex="-1"
+                      style="border:none; background:transparent;">
+                <i class="fa-solid" [class.fa-eye]="!showPassword()" [class.fa-eye-slash]="showPassword()"></i>
+              </button>
+            </div>
+          </div>
+          <div class="col-6 mb-3">
+            <label class="form-label fw-semibold small">Confirm password</label>
+            <div class="position-relative">
+              <input [type]="showConfirm() ? 'text' : 'password'" class="form-control pe-5"
+                     formControlName="confirmPassword" placeholder="********">
+              <button type="button" class="btn btn-sm position-absolute top-50 end-0 translate-middle-y me-1 text-muted"
+                      (click)="showConfirm.set(!showConfirm())" tabindex="-1"
+                      style="border:none; background:transparent;">
+                <i class="fa-solid" [class.fa-eye]="!showConfirm()" [class.fa-eye-slash]="showConfirm()"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="btn w-100 text-white fw-semibold mt-2"
+                style="background:#5b4bff;" [disabled]="loading()">
+          <span *ngIf="loading()" class="spinner-border spinner-border-sm me-2"></span>
+          Create my account
+        </button>
+      </form>
+
+      <p class="text-center text-muted small mt-4">
+        Already have an account? <a routerLink="/login" style="color:#5b4bff;">Log in</a>
+      </p>
+    </div>
+  </div>
+</div>

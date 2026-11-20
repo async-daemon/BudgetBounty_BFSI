@@ -1,0 +1,78 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h3 class="fw-bold mb-1">Digital Money Transfers</h3>
+    <p class="text-muted mb-0">Make UPI payments and bank transfers, and earn rewards for every transaction.</p>
+  </div>
+  <button class="btn text-white fw-semibold" style="background:#5b4bff;" (click)="showForm.set(!showForm())">
+    <i class="fa-solid fa-plus me-1"></i> New Transfer
+  </button>
+</div>
+
+<div *ngIf="successMessage()" class="alert alert-success animate__animated animate__fadeIn">{{ successMessage() }}</div>
+<div *ngIf="errorMessage()" class="alert alert-danger">{{ errorMessage() }}</div>
+
+<div class="bb-card p-4 mb-4" *ngIf="showForm()">
+  <h5 class="fw-bold mb-3">Send money</h5>
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label small fw-semibold">Method</label>
+        <select class="form-select" formControlName="method">
+          <option value="UPI">UPI</option>
+          <option value="NEFT">NEFT</option>
+          <option value="RTGS">RTGS</option>
+          <option value="IMPS">IMPS</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small fw-semibold">Recipient name</label>
+        <input type="text" class="form-control" formControlName="recipientName" placeholder="Ravi Kumar">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small fw-semibold">UPI ID / Account</label>
+        <input type="text" class="form-control" formControlName="recipientHandle" placeholder="ravi@okaxis">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small fw-semibold">Amount (₹)</label>
+        <input type="number" class="form-control" formControlName="amount" placeholder="1500">
+      </div>
+      <div class="col-12">
+        <label class="form-label small fw-semibold">Note (optional)</label>
+        <input type="text" class="form-control" formControlName="note" placeholder="For dinner split">
+      </div>
+    </div>
+    <button type="submit" class="btn text-white fw-semibold mt-3" style="background:#5b4bff;" [disabled]="submitting()">
+      <span *ngIf="submitting()" class="spinner-border spinner-border-sm me-2"></span>
+      Send Payment
+    </button>
+  </form>
+</div>
+
+<div class="bb-card p-4">
+  <h5 class="fw-bold mb-3">Transaction history</h5>
+  <div *ngIf="loading()" class="text-center py-4">
+    <div class="spinner-border" style="color:#5b4bff;"></div>
+  </div>
+  <div class="table-responsive" *ngIf="!loading()">
+    <table class="table align-middle">
+      <thead>
+        <tr class="text-muted small">
+          <th>Date</th><th>Recipient</th><th>Method</th><th>Amount</th><th>Status</th><th>Points</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let tx of transactions()">
+          <td class="small">{{ tx.createdAt | slice:0:10 }}</td>
+          <td>{{ tx.recipientName }}<div class="text-muted small">{{ tx.recipientHandle }}</div></td>
+          <td><span class="badge bg-light text-dark border">{{ tx.method }}</span></td>
+          <td class="fw-semibold">₹{{ tx.amount.toLocaleString('en-IN') }}</td>
+          <td><span class="badge" [class.bg-success]="tx.status === 'success'" [class.bg-danger]="tx.status !== 'success'">{{ tx.status }}</span></td>
+          <td class="text-success fw-semibold">+{{ tx.rewardPointsEarned }}</td>
+        </tr>
+        <tr *ngIf="transactions().length === 0">
+          <td colspan="6" class="text-center text-muted py-4">No transactions yet.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
